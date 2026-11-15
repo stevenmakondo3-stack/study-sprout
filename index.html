@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6fb">
+  <meta name="description" content="Study Sprout offers free Tanzania Advanced Level practice flashcards and quizzes for Biology, Computer Science, Mathematics, Physics, Chemistry, Economics, and more.">
+  <title>Study Sprout — small steps, brighter ideas</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20233a;
+      --muted: #85889d;
+      --line: #ececf3;
+      --paper: #fff;
+      --canvas: #f5f6fb;
+      --purple: #7866e8;
+      --purple-dark: #6552d6;
+      --purple-soft: #f0edff;
+      --mint: #dff6eb;
+      --green: #32835f;
+      --orange: #f1a45c;
+      --shadow: 0 14px 40px rgb(42 42 79 / 7%);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, select { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid #b5aaff;
+      outline-offset: 3px;
+    }
+
+    .app-shell { min-height: 100vh; }
+
+    .topbar {
+      height: 76px;
+      padding: 0 max(28px, calc((100vw - 1200px) / 2));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgb(255 255 255 / 82%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand { display: flex; align-items: center; gap: 11px; font-size: 17px; font-weight: 750; letter-spacing: -.5px; }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--purple);
+      color: #fff;
+      box-shadow: 0 6px 14px rgb(120 102 232 / 25%);
+    }
+    .brand-mark svg { width: 21px; height: 21px; }
+    .topbar-note { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; }
+    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #71c99e; }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 42px 28px 56px; }
+    .welcome-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 28px; }
+    .eyebrow { margin: 0 0 8px; color: var(--purple-dark); font-size: 11px; font-weight: 750; letter-spacing: 1.3px; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(27px, 4vw, 36px); line-height: 1.15; letter-spacing: -1.4px; }
+    .subtitle { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+    .curriculum-note { margin: -13px 0 25px; color: var(--muted); font-size: 11px; }
+    .curriculum-note a { color: var(--purple-dark); font-weight: 650; text-decoration: none; }
+    .curriculum-note a:hover { text-decoration: underline; }
+    .date-pill { flex-shrink: 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); color: #676a7c; font-size: 12px; }
+
+    .dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 22px; align-items: start; }
+    .primary-column, .side-column { display: grid; gap: 20px; }
+    .card { border: 1px solid var(--line); border-radius: 20px; background: var(--paper); box-shadow: var(--shadow); }
+
+    .study-card { overflow: hidden; }
+    .study-head { padding: 23px 26px 0; }
+    .study-topline { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .section-title { margin: 0; font-size: 17px; letter-spacing: -.35px; }
+    .deck-select {
+      max-width: 190px;
+      padding: 9px 31px 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: #65687d;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .tabs { display: flex; gap: 25px; margin-top: 21px; border-bottom: 1px solid var(--line); }
+    .tab {
+      position: relative;
+      padding: 0 1px 13px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] { color: var(--purple-dark); }
+    .tab[aria-selected="true"]::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; border-radius: 2px; background: var(--purple); content: ""; }
+
+    .study-content { padding: 24px 26px 27px; }
+    .session-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 13px; color: var(--muted); font-size: 12px; }
+    .session-meta strong { color: #65687d; font-weight: 650; }
+    .progress-track { height: 6px; overflow: hidden; border-radius: 99px; background: #efeff5; }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8575ed, #b2a5ff); transition: width .25s ease; }
+
+    .flashcard {
+      position: relative;
+      min-height: 274px;
+      margin: 21px 0 17px;
+      padding: 31px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e8e4ff;
+      border-radius: 17px;
+      background:
+        radial-gradient(ellipse at 12% 0%, rgb(235 231 255 / 75%), transparent 48%),
+        linear-gradient(135deg, #fbfaff, #f8f7ff);
+      text-align: center;
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .flashcard:hover { transform: translateY(-2px); }
+    .flashcard-label { position: absolute; top: 17px; left: 19px; color: #9389cc; font-size: 10px; font-weight: 750; letter-spacing: 1px; text-transform: uppercase; }
+    .flashcard-hint { position: absolute; right: 18px; bottom: 14px; color: #a4a0b7; font-size: 11px; }
+    .flashcard-text { max-width: 610px; margin: 12px 0; font-size: clamp(21px, 3vw, 28px); font-weight: 680; line-height: 1.4; letter-spacing: -.6px; }
+    .flashcard-subtext { margin: 0; color: var(--muted); font-size: 12px; }
+    .card-actions { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .btn {
+      min-height: 42px;
+      padding: 0 17px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--purple); color: white; box-shadow: 0 5px 12px rgb(120 102 232 / 20%); }
+    .btn-primary:hover { background: var(--purple-dark); }
+    .btn-quiet { border-color: var(--line); background: #fff; color: #676a7d; }
+    .btn-quiet:hover { background: #fafaff; }
+    .btn-known { border-color: #d8eee2; background: #f1fbf5; color: var(--green); }
+    .btn svg { width: 15px; height: 15px; }
+    .keyboard-hint { margin: 15px 0 0; color: #a1a2b0; font-size: 10px; text-align: center; }
+    kbd { padding: 2px 5px; border: 1px solid #e7e7ef; border-radius: 4px; background: #fff; color: #77798a; font: inherit; }
+
+    .quiz-view { display: none; }
+    .quiz-question { margin: 24px 0 18px; font-size: 20px; font-weight: 680; line-height: 1.45; letter-spacing: -.4px; }
+    .answer-list { display: grid; gap: 10px; }
+    .answer-option {
+      width: 100%;
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      color: #55586d;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .15s ease, background .15s ease;
+    }
+    .answer-option:hover:not(:disabled) { border-color: #c9c1ff; background: #fbfaff; }
+    .answer-option:disabled { cursor: default; }
+    .answer-letter { width: 25px; height: 25px; flex: 0 0 25px; display: grid; place-items: center; border-radius: 8px; background: #f3f3f8; color: #828497; font-size: 11px; font-weight: 700; }
+    .answer-option.correct { border-color: #b8e4cd; background: #f3fbf6; color: #2e7655; }
+    .answer-option.correct .answer-letter { background: #dff4e8; color: #2e7655; }
+    .answer-option.incorrect { border-color: #f1caca; background: #fff7f6; color: #a65c58; }
+    .answer-option.incorrect .answer-letter { background: #fbe7e5; color: #a65c58; }
+    .quiz-feedback { min-height: 23px; margin: 13px 0 0; color: var(--muted); font-size: 12px; }
+    .quiz-footer { margin-top: 13px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .quiz-score { color: var(--muted); font-size: 12px; }
+
+    .side-card { padding: 22px; }
+    .side-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 19px; font-size: 14px; font-weight: 720; }
+    .side-heading span { color: var(--muted); font-size: 11px; font-weight: 500; }
+    .daily-banner {
+      padding: 18px;
+      border-radius: 15px;
+      background: linear-gradient(140deg, #f1efff, #f8f6ff);
+    }
+    .daily-icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px; background: #fff; color: var(--purple); }
+    .daily-icon svg { width: 19px; height: 19px; }
+    .daily-number { margin: 15px 0 1px; font-size: 27px; font-weight: 750; letter-spacing: -1px; }
+    .daily-caption { margin: 0; color: #77768f; font-size: 11px; }
+    .goal-row { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; color: #77768f; font-size: 10px; }
+    .goal-track { height: 5px; margin-top: 7px; overflow: hidden; border-radius: 99px; background: #e4e0f9; }
+    .goal-fill { width: 0; height: 100%; border-radius: inherit; background: var(--purple); transition: width .25s ease; }
+
+    .deck-list { display: grid; gap: 14px; }
+    .deck-row { display: flex; align-items: center; gap: 11px; }
+    .deck-icon { width: 37px; height: 37px; flex: 0 0 37px; display: grid; place-items: center; border-radius: 11px; font-size: 16px; }
+    .deck-icon.violet { background: #f0edff; }
+    .deck-icon.peach { background: #fff1e5; }
+    .deck-icon.blue { background: #e8f4ff; }
+    .deck-copy { min-width: 0; flex: 1; }
+    .deck-name { overflow: hidden; color: #4a4d61; font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .deck-count { margin-top: 2px; color: #9a9baa; font-size: 10px; }
+    .deck-open { border: 0; background: transparent; color: #aaaabc; font-size: 16px; cursor: pointer; }
+    .deck-open:hover { color: var(--purple); }
+
+    .tip-card { padding: 18px; border-color: #e7f2eb; background: linear-gradient(135deg, #f3fbf6, #fbfdfb); }
+    .tip-title { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: #438365; font-size: 12px; font-weight: 750; }
+    .tip-title span { font-size: 16px; }
+    .tip-text { margin: 0; color: #70877a; font-size: 11px; line-height: 1.6; }
+    .empty-state { padding: 38px 20px; color: var(--muted); text-align: center; }
+    .empty-state strong { display: block; margin-bottom: 5px; color: var(--ink); font-size: 17px; }
+
+    @media (max-width: 880px) {
+      .dashboard { grid-template-columns: minmax(0, 1fr) 250px; gap: 16px; }
+      .side-card { padding: 18px; }
+      .study-head { padding-right: 21px; padding-left: 21px; }
+      .study-content { padding-right: 21px; padding-left: 21px; }
+    }
+    @media (max-width: 700px) {
+      .topbar { height: 66px; padding: 0 18px; }
+      main { padding: 30px 18px 40px; }
+      .dashboard { grid-template-columns: 1fr; }
+      .side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tip-card { grid-column: 1 / -1; }
+      .welcome-row { align-items: flex-start; }
+      .date-pill { display: none; }
+    }
+    @media (max-width: 470px) {
+      .side-column { grid-template-columns: 1fr; }
+      .tip-card { grid-column: auto; }
+      .study-topline { align-items: flex-start; flex-direction: column; }
+      .deck-select { max-width: none; width: 100%; }
+      .study-head { padding-top: 19px; }
+      .study-content { padding-top: 19px; }
+      .flashcard { min-height: 245px; padding: 27px 19px; }
+      .card-actions { gap: 8px; }
+      .btn { padding-right: 12px; padding-left: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Study Sprout home" style="color:inherit;text-decoration:none">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 20v-8m0 2c-4.2 0-6.5-2.1-6.5-6.5C9.9 7.5 12 9.8 12 14Zm0-3c0-4.1 2.2-6.4 6.5-6.4 0 4.3-2.3 6.4-6.5 6.4Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Study Sprout
+      </a>
+      <div class="topbar-note"><span class="online-dot" aria-hidden="true"></span>Your learning space</div>
+    </header>
+
+    <main>
+      <section class="welcome-row" aria-labelledby="welcome-title">
+        <div>
+          <p class="eyebrow">A little progress adds up</p>
+          <h1 id="welcome-title">Make today a study day.</h1>
+          <p class="subtitle">Tanzania Advanced Level practice — flashcards and quick quizzes.</p>
+        </div>
+        <div class="date-pill" id="today-date" aria-label="Today's date"></div>
+      </section>
+      <p class="curriculum-note">Use the <a href="https://www.tie.go.tz/publications/curriculum-for-upper-secondary" target="_blank" rel="noopener noreferrer">Tanzania Institute of Education (TIE) Form V–VI curriculum</a> as the official guide; these practice decks are samples, not a complete syllabus.</p>
+
+      <div class="dashboard">
+        <section class="primary-column" aria-label="Study activities">
+          <article class="card study-card">
+            <div class="study-head">
+              <div class="study-topline">
+                <h2 class="section-title">Your study session</h2>
+                <label>
+                  <span class="visually-hidden" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Choose a subject</span>
+                  <select class="deck-select" id="deck-select">
+                    <option value="all">All subjects</option>
+                    <option value="science">🌱 A-Level Biology</option>
+                    <option value="history">🏛️ Tanzania History</option>
+                    <option value="language">✍️ English vocabulary</option>
+                    <option value="mathematics">∑ Advanced Mathematics</option>
+                    <option value="physics">⚛ Advanced Physics</option>
+                    <option value="computer-science">💻 Computer Science</option>
+                    <option value="applied-math">📐 Basic Applied Mathematics</option>
+                    <option value="chemistry">🧪 Chemistry</option>
+                    <option value="economics">📊 Economics</option>
+                  </select>
+                </label>
+              </div>
+              <div class="tabs" role="tablist" aria-label="Study mode">
+                <button class="tab" id="flashcards-tab" type="button" role="tab" aria-selected="true" aria-controls="flashcards-panel">Flashcards</button>
+                <button class="tab" id="quiz-tab" type="button" role="tab" aria-selected="false" aria-controls="quiz-panel">Quick quiz</button>
+              </div>
+            </div>
+
+            <div class="study-content" id="flashcards-panel" role="tabpanel" aria-labelledby="flashcards-tab">
+              <div class="session-meta">
+                <span id="card-position">Card 1 of 8</span>
+                <strong id="known-count">0 mastered</strong>
+              </div>
+              <div class="progress-track" role="progressbar" aria-label="Flashcard progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="progress-fill" id="flashcard-progress"></div>
+              </div>
+              <div class="flashcard" id="flashcard" tabindex="0" role="button" aria-label="Flashcard. Activate to reveal the answer.">
+                <span class="flashcard-label" id="card-label">Question</span>
+                <p class="flashcard-text" id="card-text"></p>
+                <p class="flashcard-subtext" id="card-subtext">Take a moment to think of the answer</p>
+                <span class="flashcard-hint" id="card-hint">Click card to reveal</span>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-quiet" id="previous-card" type="button" aria-label="Previous card">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 18-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Previous
+                </button>
+                <button class="btn btn-primary" id="reveal-card" type="button">Reveal answer</button>
+                <button class="btn btn-known" id="next-card" type="button">
+                  Got it
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <p class="keyboard-hint"><kbd>Space</kbd> reveal <span aria-hidden="true">·</span> <kbd>←</kbd>/<kbd>→</kbd> navigate</p>
+            </div>
+
+            <div class="study-content quiz-view" id="quiz-panel" role="tabpanel" aria-labelledby="quiz-tab" aria-hidden="true">
+              <div class="session-meta">
+                <span id="quiz-position">Question 1 of 5</span>
+                <strong id="quiz-score-label">Score: 0</strong>
+              </div>
+              <div class="progress-track" role="progressbar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="progress-fill" id="quiz-progress"></div>
+              </div>
+              <p class="quiz-question" id="quiz-question"></p>
+              <div class="answer-list" id="answer-list"></div>
+              <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
+              <div class="quiz-footer">
+                <span class="quiz-score" id="quiz-hint">Choose the best answer</span>
+                <button class="btn btn-primary" id="next-question" type="button" hidden>Next question</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <aside class="side-column" aria-label="Your study overview">
+          <section class="card side-card">
+            <h2 class="side-heading">Today's progress <span>Daily goal</span></h2>
+            <div class="daily-banner">
+              <div class="daily-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M8 3v3m8-3v3M5 9h14M6 5h12a1 1 0 0 1 1 1v13H5V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="m9 14 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <p class="daily-number"><span id="today-cards">0</span><span style="font-size:14px;font-weight:600;letter-spacing:0"> cards</span></p>
+              <p class="daily-caption">Every card you review helps it stick.</p>
+              <div class="goal-row"><span>Daily goal</span><span id="goal-label">0 / 10 cards</span></div>
+              <div class="goal-track"><div class="goal-fill" id="goal-progress"></div></div>
+            </div>
+          </section>
+
+          <section class="card side-card">
+            <h2 class="side-heading">Your subjects <span>9 decks</span></h2>
+            <div class="deck-list">
+              <div class="deck-row">
+                <span class="deck-icon violet" aria-hidden="true">🌱</span>
+                <div class="deck-copy"><div class="deck-name">A-Level Biology</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="science" aria-label="Study A-Level Biology">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon peach" aria-hidden="true">🏛️</span>
+                <div class="deck-copy"><div class="deck-name">Tanzania History</div><div class="deck-count">3 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="history" aria-label="Study Tanzania History">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon blue" aria-hidden="true">✍️</span>
+                <div class="deck-copy"><div class="deck-name">English vocabulary</div><div class="deck-count">2 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="language" aria-label="Study English vocabulary">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon violet" aria-hidden="true">∑</span>
+                <div class="deck-copy"><div class="deck-name">Advanced Mathematics</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="mathematics" aria-label="Study Advanced Mathematics">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon blue" aria-hidden="true">⚛</span>
+                <div class="deck-copy"><div class="deck-name">Advanced Physics</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="physics" aria-label="Study Advanced Physics">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon blue" aria-hidden="true">💻</span>
+                <div class="deck-copy"><div class="deck-name">Computer Science</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="computer-science" aria-label="Study Computer Science">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon peach" aria-hidden="true">📐</span>
+                <div class="deck-copy"><div class="deck-name">Basic Applied Mathematics</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="applied-math" aria-label="Study Basic Applied Mathematics">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon violet" aria-hidden="true">🧪</span>
+                <div class="deck-copy"><div class="deck-name">Chemistry</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="chemistry" aria-label="Study Chemistry">›</button>
+              </div>
+              <div class="deck-row">
+                <span class="deck-icon blue" aria-hidden="true">📊</span>
+                <div class="deck-copy"><div class="deck-name">Economics</div><div class="deck-count">5 flashcards</div></div>
+                <button class="deck-open" type="button" data-deck="economics" aria-label="Study Economics">›</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card tip-card">
+            <h2 class="tip-title"><span aria-hidden="true">✦</span> Study tip</h2>
+            <p class="tip-text">Try recalling an answer before you flip the card. The effort of remembering helps it stick.</p>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const cards = [
+      { subject: "science", question: "What is meant by semi-conservative DNA replication?", answer: "Each new DNA molecule contains one original strand and one newly synthesised strand." },
+      { subject: "science", question: "What is osmosis?", answer: "The net movement of water molecules through a partially permeable membrane from higher water potential to lower water potential." },
+      { subject: "science", question: "How does natural selection change a population over generations?", answer: "Individuals with heritable advantageous traits tend to survive and reproduce more, so those traits become more common." },
+      { subject: "science", question: "How does negative feedback help regulate blood glucose?", answer: "When glucose rises, insulin promotes uptake and storage; when it falls, glucagon promotes glucose release, returning levels toward normal." },
+      { subject: "science", question: "What is the role of mRNA in protein synthesis?", answer: "mRNA carries a transcribed copy of genetic information from DNA to a ribosome, where its codons guide amino-acid assembly." },
+      { subject: "history", question: "When did the Maji Maji Rebellion against German colonial rule take place?", answer: "It began in 1905 and continued until 1907 in German East Africa." },
+      { subject: "history", question: "Name a major grievance behind the Maji Maji Rebellion.", answer: "Colonial coercion and harsh policies, including forced cotton cultivation and taxation, contributed to the uprising." },
+      { subject: "history", question: "When did Tanganyika become independent?", answer: "Tanganyika achieved independence on 9 December 1961." },
+      { subject: "language", question: "What does “benevolent” mean?", answer: "Well-meaning and kindly; wanting to do good for others." },
+      { subject: "language", question: "What is a synonym for “concise”?", answer: "Brief, succinct, or expressed in few words." },
+      { subject: "mathematics", question: "Differentiate y = e^(2x) sin x.", answer: "By the product and chain rules: dy/dx = e^(2x)(2 sin x + cos x)." },
+      { subject: "mathematics", question: "Evaluate the definite integral ∫₀¹ x e^(x²) dx.", answer: "Let u = x², so du = 2x dx. The value is (e − 1)/2." },
+      { subject: "mathematics", question: "Solve 2x² − 5x − 3 = 0.", answer: "Factor: (2x + 1)(x − 3) = 0, so x = −1/2 or x = 3." },
+      { subject: "mathematics", question: "Find the coefficient of x³ in the expansion of (1 + 2x)⁵.", answer: "The coefficient is C(5, 3) × 2³ = 10 × 8 = 80." },
+      { subject: "mathematics", question: "Solve dy/dx = 3y, given y = 2 when x = 0.", answer: "The general solution is y = Ce^(3x). Using y(0) = 2 gives y = 2e^(3x)." },
+      { subject: "physics", question: "What is the relationship between acceleration and displacement in simple harmonic motion?", answer: "a = −ω²x: acceleration is proportional to displacement and directed toward the equilibrium position." },
+      { subject: "physics", question: "A wave travels at 340 m/s with wavelength 0.50 m. What is its frequency?", answer: "Using v = fλ, f = 340 / 0.50 = 680 Hz." },
+      { subject: "physics", question: "A 12 V supply drives a current of 3.0 A through a resistor. Find its resistance.", answer: "From V = IR, R = V/I = 12/3.0 = 4.0 Ω." },
+      { subject: "physics", question: "What is the kinetic energy of a 2.0 kg object moving at 5.0 m/s?", answer: "Eₖ = ½mv² = ½ × 2.0 × 5.0² = 25 J." },
+      { subject: "physics", question: "State the ideal gas equation and identify its variables.", answer: "pV = nRT, where p is pressure, V volume, n amount in moles, R the molar gas constant, and T absolute temperature." },
+      { subject: "computer-science", question: "What is the role of the program counter in a processor?", answer: "It holds the address of the next instruction to be fetched." },
+      { subject: "computer-science", question: "Convert the binary number 101101₂ to denary.", answer: "101101₂ = 32 + 8 + 4 + 1 = 45₁₀." },
+      { subject: "computer-science", question: "What property must a primary key have in a relational table?", answer: "It uniquely identifies each record and must not be null." },
+      { subject: "computer-science", question: "What is the time complexity of binary search on a sorted list?", answer: "O(log n), because each comparison halves the remaining search interval." },
+      { subject: "computer-science", question: "What is the purpose of an operating system?", answer: "It manages hardware and system resources and provides services and an interface for application programs." },
+      { subject: "applied-math", question: "Find the dot product of vectors a = (2, 1) and b = (3, −4).", answer: "a · b = 2(3) + 1(−4) = 2." },
+      { subject: "applied-math", question: "A 10 N force acts at 30° above the horizontal. Find its vertical component.", answer: "Fᵧ = 10 sin 30° = 5 N." },
+      { subject: "applied-math", question: "Two independent events have probabilities 0.4 and 0.5. Find the probability that at least one occurs.", answer: "P(A ∪ B) = 0.4 + 0.5 − (0.4 × 0.5) = 0.7." },
+      { subject: "applied-math", question: "A force of 8 N acts perpendicular to a lever 0.25 m from its pivot. Find the moment.", answer: "Moment = force × perpendicular distance = 8 × 0.25 = 2 N m." },
+      { subject: "applied-math", question: "Find the mean of 4, 6, 8, 10 and 12.", answer: "The mean is (4 + 6 + 8 + 10 + 12) / 5 = 8." },
+      { subject: "chemistry", question: "How many moles are in 25 cm³ of a 0.20 mol dm⁻³ solution?", answer: "Convert 25 cm³ to 0.025 dm³, then n = cV = 0.20 × 0.025 = 0.0050 mol." },
+      { subject: "chemistry", question: "What does Le Châtelier's principle predict when pressure increases in a gaseous equilibrium?", answer: "The equilibrium shifts toward the side with fewer moles of gas, if the sides differ in gaseous mole count." },
+      { subject: "chemistry", question: "What happens to electrons during oxidation?", answer: "Oxidation is loss of electrons; the oxidation number increases." },
+      { subject: "chemistry", question: "What is the pH of a 1.0 × 10⁻³ mol dm⁻³ strong monoprotic acid?", answer: "Assuming complete dissociation, [H⁺] = 1.0 × 10⁻³ mol dm⁻³, so pH = 3.00." },
+      { subject: "chemistry", question: "What does a catalyst do to the activation energy and equilibrium position?", answer: "It lowers the activation energy and speeds both forward and reverse reactions, but does not change the equilibrium position." },
+      { subject: "economics", question: "What is opportunity cost?", answer: "The value of the next best alternative forgone when a choice is made." },
+      { subject: "economics", question: "Price falls by 10% and quantity demanded rises by 5%. Find the price elasticity of demand.", answer: "PED = percentage change in quantity demanded / percentage change in price = 5% / −10% = −0.5 (magnitude 0.5)." },
+      { subject: "economics", question: "What is inflation?", answer: "A sustained increase in the general price level of goods and services over time." },
+      { subject: "economics", question: "If the marginal propensity to consume is 0.8, what is the simple Keynesian multiplier?", answer: "k = 1 / (1 − MPC) = 1 / 0.2 = 5, assuming the simple model's other conditions." },
+      { subject: "economics", question: "How can a central bank use contractionary monetary policy to reduce demand-pull inflation?", answer: "It can raise interest rates or tighten credit, reducing borrowing and spending, which lowers aggregate demand." }
+    ];
+
+    const quizQuestions = [
+      { subject: "science", question: "Which statement describes semi-conservative DNA replication?", answers: ["Each daughter molecule has two new strands", "Each daughter molecule has one old and one new strand", "DNA is copied into amino acids", "Only one daughter molecule is produced"], correct: 1, explanation: "Each replicated DNA molecule contains one parental strand paired with one newly synthesised strand." },
+      { subject: "history", question: "Tanganyika became independent in which year?", answers: ["1954", "1961", "1964", "1971"], correct: 1, explanation: "Tanganyika became independent on 9 December 1961." },
+      { subject: "language", question: "Which word is closest in meaning to “concise”?", answers: ["Complicated", "Brief", "Careless", "Curious"], correct: 1, explanation: "Concise means giving information clearly in few words." },
+      { subject: "science", question: "In osmosis, water moves across a partially permeable membrane toward which region?", answers: ["Higher water potential", "Lower water potential", "Higher temperature only", "Higher solute potential"], correct: 1, explanation: "Net water movement is from higher water potential to lower water potential." },
+      { subject: "history", question: "The Maji Maji Rebellion was directed against which colonial power?", answers: ["British", "German", "Portuguese", "Belgian"], correct: 1, explanation: "The 1905–1907 uprising was against German colonial rule in German East Africa." },
+      { subject: "mathematics", question: "What is the derivative of x²eˣ at x = 0?", answers: ["0", "1", "2", "e"], correct: 0, explanation: "The product rule gives eˣ(x² + 2x), which evaluates to 0 at x = 0." },
+      { subject: "mathematics", question: "Evaluate ∫₀² 3x² dx.", answers: ["6", "8", "12", "24"], correct: 1, explanation: "An antiderivative is x³, so the definite integral is 2³ − 0³ = 8." },
+      { subject: "mathematics", question: "Find the determinant of [[4, 3], [2, 5]].", answers: ["8", "14", "20", "26"], correct: 1, explanation: "For a 2×2 matrix, the determinant is ad − bc = 4×5 − 3×2 = 14." },
+      { subject: "physics", question: "A wave travels at 340 m/s and has a wavelength of 0.50 m. What is its frequency?", answers: ["170 Hz", "340 Hz", "680 Hz", "1,360 Hz"], correct: 2, explanation: "Using v = fλ, the frequency is f = 340/0.50 = 680 Hz." },
+      { subject: "physics", question: "A 12 V supply produces a 3.0 A current. What is the resistance?", answers: ["0.25 Ω", "4.0 Ω", "9.0 Ω", "36 Ω"], correct: 1, explanation: "Ohm's law gives R = V/I = 12/3.0 = 4.0 Ω." },
+      { subject: "physics", question: "What is the kinetic energy of a 2.0 kg object moving at 5.0 m/s?", answers: ["10 J", "20 J", "25 J", "50 J"], correct: 2, explanation: "Eₖ = ½mv² = ½×2.0×5.0² = 25 J." },
+      { subject: "computer-science", question: "What is the denary value of 101101₂?", answers: ["41", "45", "47", "53"], correct: 1, explanation: "101101₂ = 32 + 8 + 4 + 1 = 45₁₀." },
+      { subject: "computer-science", question: "Which condition is required for binary search?", answers: ["The list must be sorted", "The list must contain unique values", "The list must have an even length", "The list must be stored in a database"], correct: 0, explanation: "Binary search discards half the remaining values at each step, which requires an ordered list." },
+      { subject: "computer-science", question: "What is the main purpose of a primary key?", answers: ["To encrypt the table", "To uniquely identify each record", "To sort every field", "To store duplicate records"], correct: 1, explanation: "A primary key uniquely identifies each row in a relational table." },
+      { subject: "applied-math", question: "Find the dot product of (2, 1) and (3, −4).", answers: ["−2", "2", "6", "10"], correct: 1, explanation: "The dot product is 2×3 + 1×(−4) = 2." },
+      { subject: "applied-math", question: "A 10 N force acts at 30° above the horizontal. What is its vertical component?", answers: ["5 N", "5√3 N", "10 N", "20 N"], correct: 0, explanation: "The vertical component is 10 sin 30° = 5 N." },
+      { subject: "applied-math", question: "For independent events A and B, P(A) = 0.4 and P(B) = 0.5. Find P(A or B).", answers: ["0.2", "0.5", "0.7", "0.9"], correct: 2, explanation: "P(A ∪ B) = P(A) + P(B) − P(A)P(B) = 0.4 + 0.5 − 0.2 = 0.7." },
+      { subject: "chemistry", question: "How many moles are in 25 cm³ of 0.20 mol dm⁻³ solution?", answers: ["0.00050 mol", "0.0050 mol", "0.050 mol", "5.0 mol"], correct: 1, explanation: "25 cm³ = 0.025 dm³, so n = cV = 0.20×0.025 = 0.0050 mol." },
+      { subject: "chemistry", question: "Oxidation is best defined as:", answers: ["Gain of electrons", "Loss of electrons", "Gain of neutrons", "Loss of protons"], correct: 1, explanation: "Oxidation is loss of electrons; reduction is gain of electrons." },
+      { subject: "chemistry", question: "What is the pH of a 1.0 × 10⁻³ mol dm⁻³ strong monoprotic acid?", answers: ["1", "2", "3", "11"], correct: 2, explanation: "Complete dissociation gives [H⁺] = 10⁻³ mol dm⁻³, so pH = −log₁₀[H⁺] = 3." },
+      { subject: "economics", question: "Price falls by 10% while quantity demanded rises by 5%. What is the magnitude of price elasticity of demand?", answers: ["0.5", "2", "5", "15"], correct: 0, explanation: "The magnitude is 5% ÷ 10% = 0.5, so demand is price inelastic over this range." },
+      { subject: "economics", question: "If the marginal propensity to consume is 0.8, what is the simple expenditure multiplier?", answers: ["0.2", "1.25", "4", "5"], correct: 3, explanation: "In the simple model, k = 1/(1 − MPC) = 1/0.2 = 5." },
+      { subject: "economics", question: "Which action is contractionary monetary policy?", answers: ["Lowering interest rates", "Increasing public spending", "Raising policy interest rates", "Reducing income tax"], correct: 2, explanation: "Higher interest rates tend to reduce borrowing and spending, restraining aggregate demand." }
+    ];
+
+    const storageKey = "study-sprout-progress-v1";
+    const today = new Date();
+    const dateText = new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric" }).format(today);
+    document.getElementById("today-date").textContent = dateText;
+
+    let saved = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      if (!saved || typeof saved !== "object" || Array.isArray(saved)) saved = {};
+    } catch (error) {
+      console.warn("Could not read saved study progress.", error);
+    }
+
+    const todayKey = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0")
+    ].join("-");
+    if (saved.date !== todayKey) {
+      saved.date = todayKey;
+      saved.cardsReviewed = 0;
+    }
+    if (!Number.isFinite(saved.cardsReviewed)) saved.cardsReviewed = 0;
+    if (!Array.isArray(saved.mastered)) saved.mastered = [];
+    const validCardQuestions = new Set(cards.map(card => card.question));
+    saved.mastered = saved.mastered.filter(question => validCardQuestions.has(question));
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(saved));
+      } catch (error) {
+        console.warn("Could not save study progress.", error);
+      }
+    }
+
+    let activeSubject = "all";
+    let deckCards = cards.slice();
+    let cardIndex = 0;
+    let revealed = false;
+    let quizDeck = quizQuestions.slice();
+    let quizIndex = 0;
+    let quizScore = 0;
+    let answered = false;
+
+    const flashcard = document.getElementById("flashcard");
+    const revealButton = document.getElementById("reveal-card");
+    const progressBar = document.querySelector('[aria-label="Flashcard progress"]');
+    const quizProgressBar = document.querySelector('[aria-label="Quiz progress"]');
+
+    function renderCard() {
+      const position = document.getElementById("card-position");
+      const text = document.getElementById("card-text");
+      const subjectLabel = document.getElementById("card-label");
+      const subtext = document.getElementById("card-subtext");
+      const hint = document.getElementById("card-hint");
+      const progress = deckCards.length ? Math.round((cardIndex + 1) / deckCards.length * 100) : 0;
+      position.textContent = deckCards.length ? `Card ${cardIndex + 1} of ${deckCards.length}` : "No cards";
+      document.getElementById("known-count").textContent = `${saved.mastered.length} mastered`;
+      document.getElementById("flashcard-progress").style.width = `${progress}%`;
+      progressBar.setAttribute("aria-valuenow", String(progress));
+      document.getElementById("previous-card").disabled = cardIndex === 0;
+      document.getElementById("previous-card").style.opacity = cardIndex === 0 ? ".45" : "1";
+      document.getElementById("next-card").textContent = cardIndex === deckCards.length - 1 ? "Got it" : "Got it";
+
+      if (!deckCards.length) {
+        text.textContent = "No cards in this deck yet.";
+        subjectLabel.textContent = "Study deck";
+        subtext.textContent = "Choose another subject to keep studying.";
+        hint.textContent = "";
+        flashcard.setAttribute("aria-label", "No flashcards available.");
+        revealButton.disabled = true;
+        return;
+      }
+
+      const current = deckCards[cardIndex];
+      text.textContent = revealed ? current.answer : current.question;
+      subjectLabel.textContent = revealed ? "Answer" : "Question";
+      subtext.textContent = revealed ? "Take a moment to connect it to what you know" : "Take a moment to think of the answer";
+      hint.textContent = revealed ? "Click card to see question" : "Click card to reveal";
+      flashcard.setAttribute("aria-label", `${revealed ? "Answer" : "Question"}: ${text.textContent}. Activate to ${revealed ? "see the question" : "reveal the answer"}.`);
+      revealButton.textContent = revealed ? "Show question" : "Reveal answer";
+      revealButton.disabled = false;
+    }
+
+    function revealCard() {
+      if (!deckCards.length) return;
+      revealed = !revealed;
+      renderCard();
+    }
+
+    function nextCard(markMastered) {
+      if (!deckCards.length) return;
+      if (markMastered) {
+        const key = deckCards[cardIndex].question;
+        if (!saved.mastered.includes(key)) saved.mastered.push(key);
+        saved.cardsReviewed += 1;
+        document.getElementById("today-cards").textContent = String(saved.cardsReviewed);
+        document.getElementById("goal-label").textContent = `${saved.cardsReviewed} / 10 cards`;
+        document.getElementById("goal-progress").style.width = `${Math.min(saved.cardsReviewed / 10 * 100, 100)}%`;
+        saveProgress();
+      }
+      cardIndex = (cardIndex + 1) % deckCards.length;
+      revealed = false;
+      renderCard();
+    }
+
+    function setSubject(subject) {
+      activeSubject = subject;
+      deckCards = subject === "all" ? cards.slice() : cards.filter(card => card.subject === subject);
+      cardIndex = 0;
+      revealed = false;
+      quizIndex = 0;
+      quizScore = 0;
+      document.getElementById("deck-select").value = subject;
+      renderCard();
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      const filtered = activeSubject === "all"
+        ? quizQuestions
+        : quizQuestions.filter(question => question.subject === activeSubject);
+      quizDeck = filtered.slice();
+      if (quizIndex >= quizDeck.length) quizIndex = 0;
+      const questionNode = document.getElementById("quiz-question");
+      const answerList = document.getElementById("answer-list");
+      const nextButton = document.getElementById("next-question");
+      const feedback = document.getElementById("quiz-feedback");
+      const progress = quizDeck.length ? Math.round((quizIndex + (answered ? 1 : 0)) / quizDeck.length * 100) : 0;
+
+      document.getElementById("quiz-position").textContent = quizDeck.length ? `Question ${quizIndex + 1} of ${quizDeck.length}` : "No questions";
+      document.getElementById("quiz-score-label").textContent = `Score: ${quizScore}`;
+      document.getElementById("quiz-progress").style.width = `${progress}%`;
+      quizProgressBar.setAttribute("aria-valuenow", String(progress));
+      answerList.replaceChildren();
+      feedback.textContent = "";
+      nextButton.hidden = true;
+      answered = false;
+
+      if (!quizDeck.length) {
+        questionNode.textContent = "No quiz questions in this deck yet.";
+        return;
+      }
+      questionNode.textContent = quizDeck[quizIndex].question;
+      quizDeck[quizIndex].answers.forEach((answer, index) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "answer-option";
+        option.innerHTML = `<span class="answer-letter">${String.fromCharCode(65 + index)}</span><span></span>`;
+        option.lastElementChild.textContent = answer;
+        option.addEventListener("click", () => chooseAnswer(index));
+        answerList.append(option);
+      });
+    }
+
+    function chooseAnswer(selectedIndex) {
+      if (answered) return;
+      answered = true;
+      const current = quizDeck[quizIndex];
+      const options = [...document.querySelectorAll(".answer-option")];
+      options.forEach((option, index) => {
+        option.disabled = true;
+        if (index === current.correct) option.classList.add("correct");
+        else if (index === selectedIndex) option.classList.add("incorrect");
+      });
+      const correct = selectedIndex === current.correct;
+      if (correct) quizScore += 1;
+      document.getElementById("quiz-score-label").textContent = `Score: ${quizScore}`;
+      document.getElementById("quiz-feedback").textContent = `${correct ? "That's right!" : "Not quite."} ${current.explanation}`;
+      document.getElementById("quiz-hint").textContent = correct ? "Nice work — keep it up!" : "Review the answer and try the next one.";
+      const nextButton = document.getElementById("next-question");
+      nextButton.textContent = quizIndex === quizDeck.length - 1 ? "Start again" : "Next question";
+      nextButton.hidden = false;
+      const progress = Math.round((quizIndex + 1) / quizDeck.length * 100);
+      document.getElementById("quiz-progress").style.width = `${progress}%`;
+      quizProgressBar.setAttribute("aria-valuenow", String(progress));
+    }
+
+    function moveToNextQuestion() {
+      if (quizIndex >= quizDeck.length - 1) {
+        quizIndex = 0;
+        quizScore = 0;
+      } else {
+        quizIndex += 1;
+      }
+      renderQuiz();
+    }
+
+    function switchTab(tab) {
+      const flashcardsActive = tab === "flashcards";
+      document.getElementById("flashcards-tab").setAttribute("aria-selected", String(flashcardsActive));
+      document.getElementById("quiz-tab").setAttribute("aria-selected", String(!flashcardsActive));
+      document.getElementById("flashcards-panel").style.display = flashcardsActive ? "block" : "none";
+      document.getElementById("quiz-panel").style.display = flashcardsActive ? "none" : "block";
+      document.getElementById("flashcards-panel").setAttribute("aria-hidden", String(!flashcardsActive));
+      document.getElementById("quiz-panel").setAttribute("aria-hidden", String(flashcardsActive));
+      if (!flashcardsActive) renderQuiz();
+    }
+
+    document.getElementById("deck-select").addEventListener("change", event => setSubject(event.target.value));
+    document.getElementById("previous-card").addEventListener("click", () => {
+      if (!deckCards.length || cardIndex === 0) return;
+      cardIndex -= 1;
+      revealed = false;
+      renderCard();
+    });
+    document.getElementById("next-card").addEventListener("click", () => nextCard(true));
+    revealButton.addEventListener("click", revealCard);
+    flashcard.addEventListener("click", revealCard);
+    flashcard.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        revealCard();
+      }
+    });
+    document.getElementById("flashcards-tab").addEventListener("click", () => switchTab("flashcards"));
+    document.getElementById("quiz-tab").addEventListener("click", () => switchTab("quiz"));
+    document.getElementById("next-question").addEventListener("click", moveToNextQuestion);
+    document.querySelectorAll(".deck-open").forEach(button => button.addEventListener("click", () => setSubject(button.dataset.deck)));
+    document.addEventListener("keydown", event => {
+      if (event.target instanceof HTMLElement && ["BUTTON", "SELECT", "INPUT", "TEXTAREA"].includes(event.target.tagName)) return;
+      if (event.target === flashcard) return;
+      if (document.getElementById("flashcards-panel").style.display === "none") return;
+      if (event.code === "Space") {
+        event.preventDefault();
+        revealCard();
+      } else if (event.key === "ArrowRight") {
+        nextCard(false);
+      } else if (event.key === "ArrowLeft" && cardIndex > 0) {
+        cardIndex -= 1;
+        revealed = false;
+        renderCard();
+      }
+    });
+
+    document.getElementById("today-cards").textContent = String(saved.cardsReviewed);
+    document.getElementById("goal-label").textContent = `${saved.cardsReviewed} / 10 cards`;
+    document.getElementById("goal-progress").style.width = `${Math.min(saved.cardsReviewed / 10 * 100, 100)}%`;
+    renderCard();
+    renderQuiz();
+    switchTab("flashcards");
+  </script>
+</body>
+</html>
